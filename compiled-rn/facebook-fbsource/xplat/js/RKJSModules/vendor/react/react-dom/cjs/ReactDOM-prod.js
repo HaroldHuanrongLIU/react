@@ -7,7 +7,7 @@
  * @noflow
  * @nolint
  * @preventMunge
- * @generated SignedSource<<8fb48bcb5c593a4ef69f669256981766>>
+ * @generated SignedSource<<d28e4dd00bb1cfa661197e7f84b95b35>>
  */
 
 "use strict";
@@ -146,7 +146,11 @@ exports.preinitModule = function (href, options) {
           crossOrigin: crossOrigin,
           integrity:
             "string" === typeof options.integrity ? options.integrity : void 0,
-          nonce: "string" === typeof options.nonce ? options.nonce : void 0
+          nonce: "string" === typeof options.nonce ? options.nonce : void 0,
+          fetchPriority:
+            "string" === typeof options.fetchPriority
+              ? options.fetchPriority
+              : void 0
         });
       }
     } else null == options && Internals.d.M(href);
@@ -193,7 +197,11 @@ exports.preloadModule = function (href, options) {
             : void 0,
         crossOrigin: crossOrigin,
         integrity:
-          "string" === typeof options.integrity ? options.integrity : void 0
+          "string" === typeof options.integrity ? options.integrity : void 0,
+        fetchPriority:
+          "string" === typeof options.fetchPriority
+            ? options.fetchPriority
+            : void 0
       });
     } else Internals.d.m(href);
 };
@@ -209,4 +217,4 @@ exports.useFormState = function (action, initialState, permalink) {
 exports.useFormStatus = function () {
   return ReactSharedInternals.H.useHostTransitionStatus();
 };
-exports.version = "19.3.0-native-fb-e92ecef2-20260618";
+exports.version = "19.3.0-native-fb-68631c04-20260626";
