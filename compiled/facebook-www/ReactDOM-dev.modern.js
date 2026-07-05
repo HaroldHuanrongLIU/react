@@ -3573,24 +3573,26 @@ __DEV__ &&
       return kind;
     }
     function addObjectToProperties(object, properties, indent, prefix) {
-      var addedProperties = 0,
-        key;
-      for (key in object)
-        if (
-          hasOwnProperty.call(object, key) &&
-          "_" !== key[0] &&
-          (addedProperties++,
-          addValueToProperties(key, object[key], properties, indent, prefix),
-          100 <= addedProperties)
-        ) {
-          properties.push([
-            prefix +
-              "\u00a0\u00a0".repeat(indent) +
-              "Only 100 properties are shown. React will not log more properties of this object.",
-            ""
-          ]);
-          break;
-        }
+      if (!ArrayBuffer.isView(object)) {
+        var addedProperties = 0,
+          key;
+        for (key in object)
+          if (
+            hasOwnProperty.call(object, key) &&
+            "_" !== key[0] &&
+            (addedProperties++,
+            addValueToProperties(key, object[key], properties, indent, prefix),
+            100 <= addedProperties)
+          ) {
+            properties.push([
+              prefix +
+                "\u00a0\u00a0".repeat(indent) +
+                "Only 100 properties are shown. React will not log more properties of this object.",
+              ""
+            ]);
+            break;
+          }
+      }
     }
     function readReactElementTypeof(value) {
       return "$$typeof" in value && hasOwnProperty.call(value, "$$typeof")
@@ -3670,15 +3672,23 @@ __DEV__ &&
               return;
             }
             typeName = Object.prototype.toString.call(value);
-            propKey = typeName.slice(8, typeName.length - 1);
-            if ("Array" === propKey)
+            typeName = typeName.slice(8, typeName.length - 1);
+            if (ArrayBuffer.isView(value)) {
+              value = value.length;
+              value =
+                "number" === typeof value
+                  ? typeName + "(" + value + ")"
+                  : typeName;
+              break;
+            }
+            if ("Array" === typeName)
               if (
-                ((typeName = 100 < value.length),
+                ((propKey = 100 < value.length),
                 (key = getArrayKind(value)),
                 2 === key || 0 === key)
               ) {
                 value = JSON.stringify(
-                  typeName ? value.slice(0, 100).concat("\u2026") : value
+                  propKey ? value.slice(0, 100).concat("\u2026") : value
                 );
                 break;
               } else if (3 === key) {
@@ -3691,15 +3701,15 @@ __DEV__ &&
                   propertyName < value.length && 100 > propertyName;
                   propertyName++
                 )
-                  (propKey = value[propertyName]),
+                  (typeName = value[propertyName]),
                     addValueToProperties(
-                      propKey[0],
-                      propKey[1],
+                      typeName[0],
+                      typeName[1],
                       properties,
                       indent + 1,
                       prefix
                     );
-                typeName &&
+                propKey &&
                   addValueToProperties(
                     (100).toString(),
                     "\u2026",
@@ -3709,7 +3719,7 @@ __DEV__ &&
                   );
                 return;
               }
-            if ("Promise" === propKey) {
+            if ("Promise" === typeName) {
               if ("fulfilled" === value.status) {
                 if (
                   ((typeName = properties.length),
@@ -3749,13 +3759,13 @@ __DEV__ &&
               ]);
               return;
             }
-            "Object" === propKey &&
-              (typeName = Object.getPrototypeOf(value)) &&
-              "function" === typeof typeName.constructor &&
-              (propKey = typeName.constructor.name);
+            "Object" === typeName &&
+              (propKey = Object.getPrototypeOf(value)) &&
+              "function" === typeof propKey.constructor &&
+              (typeName = propKey.constructor.name);
             properties.push([
               prefix + "\u00a0\u00a0".repeat(indent) + propertyName,
-              "Object" === propKey ? (3 > indent ? "" : "\u2026") : propKey
+              "Object" === typeName ? (3 > indent ? "" : "\u2026") : typeName
             ]);
             3 > indent &&
               addObjectToProperties(value, properties, indent + 1, prefix);
@@ -7602,7 +7612,7 @@ __DEV__ &&
           null;
       hookTypesUpdateIndexDev = -1;
       null !== current &&
-        (current.flags & 133169152) !== (workInProgress.flags & 133169152) &&
+        (current.flags & 1206910976) !== (workInProgress.flags & 1206910976) &&
         console.error(
           "Internal React error: Expected static flag was missing. Please notify the React team."
         );
@@ -11220,7 +11230,7 @@ __DEV__ &&
             }
           )),
           (JSCompiler_object_inline_stack_2944.subtreeFlags =
-            componentStack.subtreeFlags & 133169152),
+            componentStack.subtreeFlags & 1206910976),
           null !== JSCompiler_object_inline_componentStack_2945
             ? (nextPrimaryChildren = createWorkInProgress(
                 JSCompiler_object_inline_componentStack_2945,
@@ -12840,8 +12850,8 @@ __DEV__ &&
 
           )
             (newChildLanes |= _child2.lanes | _child2.childLanes),
-              (subtreeFlags |= _child2.subtreeFlags & 133169152),
-              (subtreeFlags |= _child2.flags & 133169152),
+              (subtreeFlags |= _child2.subtreeFlags & 1206910976),
+              (subtreeFlags |= _child2.flags & 1206910976),
               (_treeBaseDuration += _child2.treeBaseDuration),
               (_child2 = _child2.sibling);
           completedWork.treeBaseDuration = _treeBaseDuration;
@@ -12853,8 +12863,8 @@ __DEV__ &&
           )
             (newChildLanes |=
               _treeBaseDuration.lanes | _treeBaseDuration.childLanes),
-              (subtreeFlags |= _treeBaseDuration.subtreeFlags & 133169152),
-              (subtreeFlags |= _treeBaseDuration.flags & 133169152),
+              (subtreeFlags |= _treeBaseDuration.subtreeFlags & 1206910976),
+              (subtreeFlags |= _treeBaseDuration.flags & 1206910976),
               (_treeBaseDuration.return = completedWork),
               (_treeBaseDuration = _treeBaseDuration.sibling);
       else if ((completedWork.mode & ProfileMode) !== NoMode) {
@@ -13601,6 +13611,17 @@ __DEV__ &&
           return (
             enableViewTransition &&
               ((workInProgress.flags |= 33554432),
+              enableViewTransitionParentEnterExit &&
+                ((current = workInProgress.pendingProps),
+                (workInProgress.flags =
+                  void 0 !== current.parentEnter ||
+                  void 0 !== current.parentExit ||
+                  null != current.onParentEnter ||
+                  null != current.onParentExit ||
+                  null != current.onGestureParentEnter ||
+                  null != current.onGestureParentExit
+                    ? workInProgress.flags | 1073741824
+                    : workInProgress.flags & -1073741825)),
               bubbleProperties(workInProgress)),
             null
           );
@@ -14645,6 +14666,108 @@ __DEV__ &&
           placement = placement.sibling;
         }
     }
+    function commitParentEnterViewTransitions(parent, gesture) {
+      for (parent = parent.child; null !== parent; ) {
+        if (22 !== parent.tag || null === parent.memoizedState)
+          if (30 === parent.tag) {
+            var props = parent.memoizedProps,
+              hasParentClass = void 0 !== props.parentEnter,
+              hasParentHandler = gesture
+                ? null != props.onGestureParentEnter
+                : null != props.onParentEnter;
+            if (hasParentClass || hasParentHandler) {
+              var relay = !0;
+              if (hasParentClass) {
+                hasParentClass = getViewTransitionName(props, parent.stateNode);
+                var className = getViewTransitionClassName(
+                  props.default,
+                  props.parentEnter
+                );
+                "none" === className
+                  ? (relay = !1)
+                  : (applyViewTransitionToHostInstances(
+                      parent,
+                      hasParentClass,
+                      className,
+                      null,
+                      !1
+                    ),
+                    hasParentHandler &&
+                      !gesture &&
+                      scheduleViewTransitionEvent(parent, props.onParentEnter));
+              } else
+                gesture ||
+                  scheduleViewTransitionEvent(parent, props.onParentEnter);
+              relay && commitParentEnterViewTransitions(parent, gesture);
+            }
+          } else
+            0 !== (parent.subtreeFlags & 1073741824) &&
+              commitParentEnterViewTransitions(parent, gesture);
+        parent = parent.sibling;
+      }
+    }
+    function commitParentExitViewTransitions(parent, gesture) {
+      for (parent = parent.child; null !== parent; ) {
+        if (22 !== parent.tag || null === parent.memoizedState)
+          if (30 === parent.tag) {
+            var props = parent.memoizedProps,
+              hasParentClass = void 0 !== props.parentExit,
+              hasParentHandler = gesture
+                ? null != props.onGestureParentExit
+                : null != props.onParentExit;
+            if (hasParentClass || hasParentHandler) {
+              var relay = !0;
+              if (hasParentClass) {
+                hasParentClass = getViewTransitionName(props, parent.stateNode);
+                var className = getViewTransitionClassName(
+                  props.default,
+                  props.parentExit
+                );
+                "none" === className
+                  ? (relay = !1)
+                  : (applyViewTransitionToHostInstances(
+                      parent,
+                      hasParentClass,
+                      className,
+                      null,
+                      !1
+                    ),
+                    hasParentHandler &&
+                      !gesture &&
+                      scheduleViewTransitionEvent(parent, props.onParentExit));
+              } else
+                gesture ||
+                  scheduleViewTransitionEvent(parent, props.onParentExit);
+              relay && commitParentExitViewTransitions(parent, gesture);
+            }
+          } else
+            0 !== (parent.subtreeFlags & 1073741824) &&
+              commitParentExitViewTransitions(parent, gesture);
+        parent = parent.sibling;
+      }
+    }
+    function restoreParentEnterOrExitViewTransitions(parent) {
+      for (parent = parent.child; null !== parent; ) {
+        if (22 !== parent.tag || null === parent.memoizedState)
+          if (30 === parent.tag) {
+            var props = parent.memoizedProps,
+              hasParentClass =
+                void 0 !== props.parentEnter || void 0 !== props.parentExit;
+            props =
+              null != props.onParentEnter ||
+              null != props.onParentExit ||
+              null != props.onGestureParentEnter ||
+              null != props.onGestureParentExit;
+            hasParentClass &&
+              restoreViewTransitionOnHostInstances(parent.child, !1);
+            (hasParentClass || props) &&
+              restoreParentEnterOrExitViewTransitions(parent);
+          } else
+            0 !== (parent.subtreeFlags & 1073741824) &&
+              restoreParentEnterOrExitViewTransitions(parent);
+        parent = parent.sibling;
+      }
+    }
     function commitEnterViewTransitions(placement, gesture) {
       if (30 === placement.tag) {
         var state = placement.stateNode,
@@ -14664,8 +14787,10 @@ __DEV__ &&
             )
             ? (commitAppearingPairViewTransitions(placement),
               state.paired ||
-                gesture ||
-                scheduleViewTransitionEvent(placement, props.onEnter))
+                (gesture ||
+                  scheduleViewTransitionEvent(placement, props.onEnter),
+                enableViewTransitionParentEnterExit &&
+                  commitParentEnterViewTransitions(placement, gesture)))
             : restoreViewTransitionOnHostInstances(placement.child, !1)
           : commitAppearingPairViewTransitions(placement);
       } else if (0 !== (placement.subtreeFlags & 33554432))
@@ -14746,7 +14871,9 @@ __DEV__ &&
                 (className.paired = pair),
                 appearingViewTransitions.delete(name),
                 scheduleViewTransitionEvent(deletion, props.onShare))
-              : scheduleViewTransitionEvent(deletion, props.onExit)
+              : (scheduleViewTransitionEvent(deletion, props.onExit),
+                enableViewTransitionParentEnterExit &&
+                  commitParentExitViewTransitions(deletion, !1))
             : restoreViewTransitionOnHostInstances(deletion.child, !1));
         null !== appearingViewTransitions &&
           commitDeletedPairViewTransitions(deletion);
@@ -14797,6 +14924,8 @@ __DEV__ &&
       if (30 === fiber.tag)
         (fiber.stateNode.paired = null),
           restoreViewTransitionOnHostInstances(fiber.child, !1),
+          enableViewTransitionParentEnterExit &&
+            restoreParentEnterOrExitViewTransitions(fiber),
           restorePairedViewTransitions(fiber);
       else if (0 !== (fiber.subtreeFlags & 33554432))
         for (fiber = fiber.child; null !== fiber; )
@@ -18798,7 +18927,10 @@ __DEV__ &&
                   errorRetryLanes,
                   !1
                 );
-                if (errorRetryLanes !== RootErrored) {
+                if (
+                  errorRetryLanes !== RootErrored &&
+                  errorRetryLanes !== RootSuspendedAtTheShell
+                ) {
                   if (
                     workInProgressRootDidAttachPingListener &&
                     !wasRootDehydrated
@@ -21516,7 +21648,7 @@ __DEV__ &&
           (workInProgress.deletions = null),
           (workInProgress.actualDuration = -0),
           (workInProgress.actualStartTime = -1.1));
-      workInProgress.flags = current.flags & 133169152;
+      workInProgress.flags = current.flags & 1206910976;
       workInProgress.childLanes = current.childLanes;
       workInProgress.lanes = current.lanes;
       workInProgress.child = current.child;
@@ -21554,7 +21686,7 @@ __DEV__ &&
       return workInProgress;
     }
     function resetWorkInProgress(workInProgress, renderLanes) {
-      workInProgress.flags &= 133169154;
+      workInProgress.flags &= 1206910978;
       var current = workInProgress.alternate;
       null === current
         ? ((workInProgress.childLanes = 0),
@@ -28813,6 +28945,8 @@ __DEV__ &&
         dynamicFeatureFlags.enableFragmentRefsTextNodes,
       enableInternalInstanceMap = dynamicFeatureFlags.enableInternalInstanceMap,
       enableParallelTransitions = dynamicFeatureFlags.enableParallelTransitions,
+      enableViewTransitionParentEnterExit =
+        dynamicFeatureFlags.enableViewTransitionParentEnterExit,
       enableSchedulingProfiler = dynamicFeatureFlags.enableSchedulingProfiler,
       searchTarget = null,
       searchBoundary = null,
@@ -33035,11 +33169,11 @@ __DEV__ &&
       return_targetInst = null;
     (function () {
       var isomorphicReactPackageVersion = React.version;
-      if ("19.3.0-www-modern-68631c04-20260626" !== isomorphicReactPackageVersion)
+      if ("19.3.0-www-modern-e71a6393-20260702" !== isomorphicReactPackageVersion)
         throw Error(
           'Incompatible React versions: The "react" and "react-dom" packages must have the exact same version. Instead got:\n  - react:      ' +
             (isomorphicReactPackageVersion +
-              "\n  - react-dom:  19.3.0-www-modern-68631c04-20260626\nLearn more: https://react.dev/warnings/version-mismatch")
+              "\n  - react-dom:  19.3.0-www-modern-e71a6393-20260702\nLearn more: https://react.dev/warnings/version-mismatch")
         );
     })();
     ("function" === typeof Map &&
@@ -33082,10 +33216,10 @@ __DEV__ &&
       !(function () {
         var internals = {
           bundleType: 1,
-          version: "19.3.0-www-modern-68631c04-20260626",
+          version: "19.3.0-www-modern-e71a6393-20260702",
           rendererPackageName: "react-dom",
           currentDispatcherRef: ReactSharedInternals,
-          reconcilerVersion: "19.3.0-www-modern-68631c04-20260626"
+          reconcilerVersion: "19.3.0-www-modern-e71a6393-20260702"
         };
         internals.overrideHookState = overrideHookState;
         internals.overrideHookStateDeletePath = overrideHookStateDeletePath;
@@ -33639,6 +33773,7 @@ __DEV__ &&
                 "string" === typeof options.integrity
                   ? options.integrity
                   : void 0,
+              nonce: "string" === typeof options.nonce ? options.nonce : void 0,
               fetchPriority:
                 "string" === typeof options.fetchPriority
                   ? options.fetchPriority
@@ -33706,7 +33841,7 @@ __DEV__ &&
     exports.useFormStatus = function () {
       return resolveDispatcher().useHostTransitionStatus();
     };
-    exports.version = "19.3.0-www-modern-68631c04-20260626";
+    exports.version = "19.3.0-www-modern-e71a6393-20260702";
     "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ &&
       "function" ===
         typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop &&
