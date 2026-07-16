@@ -1806,7 +1806,7 @@ module.exports = function ($$$config) {
         return (
           (newIndex = newIndex.index),
           newIndex < lastPlacedIndex
-            ? ((newFiber.flags |= 134217730), lastPlacedIndex)
+            ? ((newFiber.flags |= 2), lastPlacedIndex)
             : newIndex
         );
       newFiber.flags |= 134217730;
@@ -12758,8 +12758,8 @@ module.exports = function ($$$config) {
   ) {
     var fiberTag = 0;
     owner = type;
-    if ("function" === typeof type) shouldConstruct(type) && (fiberTag = 1);
-    else if ("string" === typeof type)
+    if ("function" === typeof owner) shouldConstruct(owner) && (fiberTag = 1);
+    else if ("string" === typeof owner)
       fiberTag =
         supportsResources && supportsSingletons
           ? isHostHoistableType(type, pendingProps, contextStackCursor.current)
@@ -12781,7 +12781,7 @@ module.exports = function ($$$config) {
                 : 5
               : 5;
     else
-      a: switch (type) {
+      a: switch (owner) {
         case REACT_ACTIVITY_TYPE:
           return (
             (type = createFiber(31, pendingProps, key, mode)),
@@ -12869,8 +12869,8 @@ module.exports = function ($$$config) {
               key
             );
         default:
-          if ("object" === typeof type && null !== type)
-            switch (type.$$typeof) {
+          if ("object" === typeof owner && null !== owner)
+            switch (owner.$$typeof) {
               case REACT_CONTEXT_TYPE:
                 fiberTag = 10;
                 break a;
@@ -14341,7 +14341,7 @@ module.exports = function ($$$config) {
       version: rendererVersion,
       rendererPackageName: rendererPackageName,
       currentDispatcherRef: ReactSharedInternals,
-      reconcilerVersion: "19.3.0-www-modern-e71a6393-20260702"
+      reconcilerVersion: "19.3.0-www-modern-b740af25-20260715"
     };
     null !== extraDevToolsConfig &&
       (internals.rendererConfig = extraDevToolsConfig);
